@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">wikiPoints</string>
+    <string name="location_now">Actual position:</string>
+</resources>

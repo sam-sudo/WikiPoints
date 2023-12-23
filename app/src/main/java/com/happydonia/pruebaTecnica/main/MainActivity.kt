@@ -1,10 +1,13 @@
 package com.happydonia.pruebaTecnica.main
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -12,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.happydonia.pruebaTecnica.R
 import com.happydonia.pruebaTecnica.domain.WikiArticle
+import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
 import com.happydonia.pruebaTecnica.domain.adapters.WikiArticlesAdapter
 import com.happydonia.pruebaTecnica.utils.LogHandler
 
@@ -22,14 +26,20 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
     lateinit var mRecyclerView : RecyclerView
     val mAdapter : WikiArticlesAdapter = WikiArticlesAdapter()
-
-    lateinit var tvActualPosition : TextView
-
+    lateinit var mainPresenter: MainPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        LogHandler.w("onCreate mainActivity")
         setContentView(R.layout.activity_main)
+        LogHandler.w("onCreate mainActivity")
+
+        mRecyclerView = findViewById<RecyclerView>(R.id.rvWikiArticles)
+        mRecyclerView.layoutManager = LinearLayoutManager(this)
+        mAdapter.WikiArticlesAdapter(this)
+        mRecyclerView.adapter = mAdapter
+
+        mainPresenter = MainPresenter(this,MainApi(this))
+
 
 
 
@@ -50,47 +60,37 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
 
 
+        LogHandler.w("END onCreate mainActivity")
 
     }
 
-    fun getWikiArticles(): MutableList<WikiArticle>{
-        var wikiArticleList:MutableList<WikiArticle> = ArrayList()
-        wikiArticleList.apply {
-            add(WikiArticle("Artículo 1", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "10 km"))
-            add(WikiArticle("Artículo 2", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "15 km"))
-            add(WikiArticle("Artículo 3", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "20 km"))
-            add(WikiArticle("Artículo 4", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "5 km"))
-            add(WikiArticle("Artículo 5", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "12 km"))
-            add(WikiArticle("Artículo 6", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "8 km"))
-            add(WikiArticle("Artículo 7", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "18 km"))
-            add(WikiArticle("Artículo 8", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "25 km"))
-            add(WikiArticle("Artículo 9", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "3 km"))
-            add(WikiArticle("Artículo 10", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "14 km"))
-            add(WikiArticle("Artículo 11", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "7 km"))
-            add(WikiArticle("Artículo 12", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "22 km"))
-            add(WikiArticle("Artículo 13", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "11 km"))
-            add(WikiArticle("Artículo 14", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "17 km"))
-            add(WikiArticle("Artículo 15", "https://upload.wikimedia.org/wikipedia/commons/0/07/Madonna_You%27ll_See.jpg", "9 km"))
-        }
-        return wikiArticleList
-    }
 
 
-    override fun showWikiArticles(wikiList: MutableList<WikiArticle>) {
-        mRecyclerView = findViewById<RecyclerView>(R.id.rvWikiArticles)
-        mRecyclerView.layoutManager = LinearLayoutManager(this)
-        mAdapter.WikiArticlesAdapter(getWikiArticles(), this)
-        mRecyclerView.adapter = mAdapter
+
+    override fun showWikiArticles(wikiList: MutableList<WikiArticleOwn>) {
+        LogHandler.w("showWiki")
+
+        mAdapter.submitList(wikiList)
+
+        /*mAdapter.wikiArticles = wikiList*/
+
+
     }
 
     override fun showError(message: String) {
-        //todo mostrar pantalla con mensaje de error o un snackbar 
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
     }
 
 
-    fun permissionsAccepted(){
+
+
+    //Permissions
+    private fun permissionsAccepted(){
         LogHandler.w("permission accepted", "Permissions")
-        showWikiArticles(getWikiArticles())
+        //showWikiArticles(getWikiArticles())
+        mainPresenter.getWikiArticles()
+
+
     }
 
 
@@ -100,6 +100,9 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+
+
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

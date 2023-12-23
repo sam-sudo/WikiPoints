@@ -1,41 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- En res/layout/card_layout.xml -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:orientation="horizontal"
+    android:layout_height="wrap_content"
     android:layout_margin="10dp"
-    >
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/colorCardBackground">
 
-    <ImageView
-        android:id="@+id/iv_wikiImage"
-        android:layout_width="200dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
-
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:weightSum="3">
+        android:layout_height="100dp"
+        android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tv_wikiTitle"
+        <ImageView
+            android:id="@+id/iv_wikiImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_launcher_foreground" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:layout_weight="1"
-            />
+            android:layout_toEndOf="@id/iv_wikiImage"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_wikiDistance"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:layout_weight="2"
-            />
+            <TextView
+                android:id="@+id/tv_wikiTitle"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="Wiki Title"
+                android:textStyle="bold"
+                android:textColor="@color/colorTextPrimary" />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            <TextView
+                android:id="@+id/tv_wikiDistance"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:gravity="center_vertical"
+                android:text="Wiki Distance"
+                android:textColor="@color/colorTextSecondary" />
+        </LinearLayout>
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

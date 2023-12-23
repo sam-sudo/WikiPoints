@@ -10,13 +10,22 @@
         android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:visibility="gone" />
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvWikiArticles"
+
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
-        android:visibility="gone"
-        />
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvWikiArticles"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+
+            />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/tv_no_permissions"

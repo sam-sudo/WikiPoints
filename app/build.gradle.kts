@@ -58,6 +58,7 @@ dependencies {
 
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
 
-
+    //swiperefresh
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
 }

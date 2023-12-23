@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import com.happydonia.pruebaTecnica.R
 import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
@@ -25,7 +26,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
 
-
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var mRecyclerView : RecyclerView
     val mAdapter : WikiArticlesAdapter = WikiArticlesAdapter()
     lateinit var mainPresenter: MainPresenter
@@ -47,6 +48,18 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
         progressBar = findViewById(R.id.progressBar)
         tvNoPermission = findViewById(R.id.tv_no_permissions)
+
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+
+        swipeRefreshLayout.setOnRefreshListener {
+
+            LogHandler.w("refres")
+            GlobalScope.launch {
+                mainPresenter.getWikiArticles()
+            }
+
+
+        }
 
 
         if (checkSelfPermission(
@@ -75,7 +88,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
     override fun showWikiArticles(wikiList: MutableList<WikiArticleOwn>) {
         LogHandler.w("showWiki")
-
+        swipeRefreshLayout.isRefreshing = false
         hideProgressBar()
         showRecyclerList()
         mAdapter.submitList(wikiList)
@@ -128,6 +141,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
                 } else {
                     LogHandler.w("permission denied", "Permissions")
                     showError("No location permission granted!")
+                    showNoPermissionsText()
                 }
             }
         }
@@ -181,11 +195,11 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
 
     private fun hideRecyclerList() {
-        mRecyclerView.visibility = View.GONE
+        swipeRefreshLayout.visibility = View.GONE
     }
     private fun showRecyclerList() {
         hideNoPermissionsText()
-        mRecyclerView.visibility = View.VISIBLE
+        swipeRefreshLayout.visibility = View.VISIBLE
     }
 
 }

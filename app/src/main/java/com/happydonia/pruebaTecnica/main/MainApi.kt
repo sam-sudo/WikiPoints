@@ -7,16 +7,15 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.happydonia.pruebaTecnica.domain.WikiArticle
 import org.json.JSONException
-import org.json.JSONObject
 import com.android.volley.Request;
-import com.android.volley.Response
-import com.android.volley.VolleyError;
-import com.happydonia.pruebaTecnica.GeosearchResult
 import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
+import com.happydonia.pruebaTecnica.domain.WikiArticleWithImage
 import com.happydonia.pruebaTecnica.utils.LocationHandler
 import com.happydonia.pruebaTecnica.utils.LogHandler
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
 
 class MainApi(var context: Context): MainContract.ModelApi{
 
@@ -25,177 +24,195 @@ class MainApi(var context: Context): MainContract.ModelApi{
     private val FORMAT_JSON = "json"
 
     // Método para hacer la solicitud a la API de MediaWiki
-    fun searchNearsArticles( latitud: Double, longitud: Double,
-                             successListener: (MutableList<WikiArticleOwn>) -> Unit,
-                             errorListener:(String) -> Unit) {
-        // Obtén la instancia de RequestQueue
-        val queue: RequestQueue = Volley.newRequestQueue(context)
+    private suspend fun  searchNearsArticlesAsync(latitud: Double, longitud: Double): MutableList<WikiArticle> {
+        return suspendCancellableCoroutine { continuation ->
 
-        LogHandler.w("latitud: $latitud")
-        // Parámetros de la solicitud
-        val parameters = String.format(
-            "?action=%s&list=geosearch&gscoord=%s|%s&gsradius=10000&format=%s",
-            ACTION_QUERY,
-            latitud,
-            longitud,
-            FORMAT_JSON
-        )
+            // Obtén la instancia de RequestQueue
+            val queue: RequestQueue = Volley.newRequestQueue(context)
 
-        // Crea la URL completa para la solicitud
-        val url = BASE_URL + parameters
+            LogHandler.w("latitud: $latitud")
+            // Parámetros de la solicitud
+            val parameters = String.format(
+                "?action=%s&list=geosearch&gscoord=%s|%s&gsradius=10000&format=%s",
+                ACTION_QUERY,
+                latitud,
+                longitud,
+                FORMAT_JSON
+            )
 
-        Log.w("TAG", "url: $url", )
+            // Crea la URL completa para la solicitud
+            val url = BASE_URL + parameters
 
-        // Crea la solicitud GET
-        val request = JsonObjectRequest(
-            Request.Method.GET,
-            url,
-            null,
-            { response ->
-                // Manejar la respuesta exitosa
-                LogHandler.w("response:")
-                try {
-                    // Obtener la lista de artículos cercanos
-                    val queryObject = response.getJSONObject("query")
-                    LogHandler.w("queryObject : $queryObject")
-                    val pagesObject = queryObject.getJSONArray("geosearch")
+            Log.w("TAG", "url: $url", )
 
-                    LogHandler.w("pagesObject : ${pagesObject.toString()}")
+            // Crea la solicitud GET
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+                { response ->
+                    // Manejar la respuesta exitosa
+                    LogHandler.w("response:")
+                    try {
+                        // Obtener la lista de artículos cercanos
+                        val queryObject = response.getJSONObject("query")
+                        LogHandler.w("queryObject : $queryObject")
+                        val pagesObject = queryObject.getJSONArray("geosearch")
 
-                    // Deserializar el JSON a un objeto QueryResult
-                    val articles = mutableListOf<WikiArticle>()
+                        LogHandler.w("pagesObject : ${pagesObject.toString()}")
 
-                    for (i in 0 until pagesObject.length()) {
-                        val articleObject = pagesObject.getJSONObject(i)
+                        // Deserializar el JSON a un objeto QueryResult
+                        val articles = mutableListOf<WikiArticle>()
 
-                        val pageId = articleObject.getInt("pageid")
-                        val namespace = articleObject.getInt("ns")
-                        val title = articleObject.getString("title")
-                        val latitude = articleObject.getDouble("lat")
-                        val longitude = articleObject.getDouble("lon")
-                        val distance = articleObject.getDouble("dist")
-                        val primary = articleObject.getString("primary")
+                        for (i in 0 until pagesObject.length()) {
+                            val articleObject = pagesObject.getJSONObject(i)
 
-                        val article = WikiArticle(pageId, namespace, title, latitude, longitude, distance, primary)
-                        articles.add(article)
+                            val pageId = articleObject.getInt("pageid")
+                            val namespace = articleObject.getInt("ns")
+                            val title = articleObject.getString("title")
+                            val latitude = articleObject.getDouble("lat")
+                            val longitude = articleObject.getDouble("lon")
+                            val distance = articleObject.getDouble("dist")
+                            val primary = articleObject.getString("primary")
+
+                            val article = WikiArticle(pageId, namespace, title, latitude, longitude, distance, primary)
+                            articles.add(article)
+                        }
+                        LogHandler.w("articles : ${articles.toString()}")
+
+                        Log.w("dd", "getWikiArticlesFromApi: ", )
+
+                        continuation.resume(articles)
+
+                        //searchArticlesInfo()
+
+                        /*for (article in articles) {
+                            println("Title: ${article.title}")
+                            println("Latitude: ${article.latitude}")
+                            println("Longitude: ${article.longitude}")
+                            println()
+                        }*/
+
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
                     }
-                    LogHandler.w("articles : ${articles.toString()}")
-
-                    Log.w("dd", "getWikiArticlesFromApi: ", )
-
-                    var wikiArticleList:MutableList<WikiArticleOwn> = ArrayList()
-                    wikiArticleList.apply {
-                        add(WikiArticleOwn("1111","prueba imagen url","10 km","https://commons.wikimedia.org/wiki/File:Aiga_bus_trans.svg"))
-                        add(WikiArticleOwn("111133","prueba imagen url","12 km","https://commons.wikimedia.org/wiki/File:Aiga_bus_trans.svg"))
-                        add(WikiArticleOwn("111133","prueba imagen url","13 km","https://commons.wikimedia.org/wiki/File:Aiga_bus_trans.svg"))
-
-                    }
-
-                    successListener(wikiArticleList)
-
-                    //searchArticlesInfo()
-
-                    /*for (article in articles) {
-                        println("Title: ${article.title}")
-                        println("Latitude: ${article.latitude}")
-                        println("Longitude: ${article.longitude}")
-                        println()
-                    }*/
-
-                } catch (e: JSONException) {
-                    e.printStackTrace()
+                },
+                { error ->
+                    // Manejar el error de la solicitud
+                    // Aquí puedes manejar errores de conexión, tiempo de espera, etc.
                 }
-            },
-            { error ->
-                // Manejar el error de la solicitud
-                // Aquí puedes manejar errores de conexión, tiempo de espera, etc.
-            }
-        )
+            )
 
 
-        // Añade la solicitud a la cola
-        queue.add(request)
+            // Añade la solicitud a la cola
+            queue.add(request)
+
+        }
+
+
     }
-   /* fun searchArticlesInfo( articlesIds: ArrayList<Int>) {
-        // Obtén la instancia de RequestQueue
-        val queue: RequestQueue = Volley.newRequestQueue(context)
 
-        // Parámetros de la solicitud
-        val parameters = String.format(
-            "?action=%s&list=geosearch&gscoord=%s|%s&gsradius=10000&format=%s",
-            ACTION_QUERY,
-            latitud,
-            longitud,
-            FORMAT_JSON
-        )
 
-        // Crea la URL completa para la solicitud
-        val url = BASE_URL + parameters
+    suspend fun searchArticlesInfo( articlesIds: List<Int>):MutableList<WikiArticleWithImage> {
+        return suspendCancellableCoroutine { continuation ->
 
-        Log.w("TAG", "url: $url", )
+            // Obtén la instancia de RequestQueue
+            val queue: RequestQueue = Volley.newRequestQueue(context)
+            val pageIdsString = articlesIds.joinToString("|")
+            // Parámetros de la solicitud
+            val parameters = String.format(
+                "?action=%s&prop=coordinates|pageimages|info&pageids=%s&inprop=url&format=%s",
+                ACTION_QUERY,
+                pageIdsString,
+                FORMAT_JSON
+            )
 
-        // Crea la solicitud GET
-        val request = JsonObjectRequest(
-            Request.Method.GET,
-            url,
-            null,
-            { response ->
-                // Manejar la respuesta exitosa
-                LogHandler.w("response:")
-                try {
-                    // Obtener la lista de artículos cercanos
-                    val queryObject = response.getJSONObject("query")
-                    LogHandler.w("queryObject : $queryObject")
-                    val pagesObject = queryObject.getJSONArray("geosearch")
+            // Crea la URL completa para la solicitud
+            val url = BASE_URL + parameters
 
-                    LogHandler.w("pagesObject : ${pagesObject.toString()}")
+            Log.w("TAG", "url 2: $url", )
 
-                    // Deserializar el JSON a un objeto QueryResult
-                    val articles = mutableListOf<WikiArticle>()
 
-                    for (i in 0 until pagesObject.length()) {
-                        val articleObject = pagesObject.getJSONObject(i)
+            // Crea la solicitud GET
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+                { response ->
+                    // Manejar la respuesta exitosa
+                    LogHandler.w("response:")
+                    try {
+                        // Obtener la lista de artículos cercanos
+                        val queryObject = response.getJSONObject("query")
+                        LogHandler.w("queryObject : $queryObject")
 
-                        val pageId = articleObject.getInt("pageid")
-                        val namespace = articleObject.getInt("ns")
-                        val title = articleObject.getString("title")
-                        val latitude = articleObject.getDouble("lat")
-                        val longitude = articleObject.getDouble("lon")
-                        val distance = articleObject.getDouble("dist")
-                        val primary = articleObject.getString("primary")
+                        val pagesObject = queryObject.getJSONObject("pages")
+                        LogHandler.w("pagesObject : ${pagesObject.toString()}")
 
-                        val article = WikiArticle(pageId, namespace, title, latitude, longitude, distance, primary)
-                        articles.add(article)
+                        // Obtener las claves de "pages"
+                        val pageIds = pagesObject.keys()
+
+                        // Iterar sobre las claves y obtener la información de cada página
+                        val pagesList = mutableListOf<WikiArticleWithImage>()
+
+                        for (pageId in pageIds) {
+                            val pageObject = pagesObject.getJSONObject(pageId)
+
+                            val title = pageObject.getString("title")
+                            val fullUrl = pageObject.getString("fullurl")
+                            val thumbnailObject = pageObject.getJSONObject("thumbnail")
+                            val thumbnailSource = thumbnailObject.getString("source")
+                            val pageImage = pageObject.getString("pageimage")
+
+                            val wikiPage = WikiArticleWithImage(title,pageId,pageImage,thumbnailSource,fullUrl)
+
+                            pagesList.add(wikiPage)
+                        }
+
+                        continuation.resume(pagesList)
+
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
                     }
-
-                    searchArticlesInfo()
-
-                    *//*for (article in articles) {
-                        println("Title: ${article.title}")
-                        println("Latitude: ${article.latitude}")
-                        println("Longitude: ${article.longitude}")
-                        println()
-                    }*//*
-
-                } catch (e: JSONException) {
-                    e.printStackTrace()
+                },
+                { error ->
+                    // Manejar el error de la solicitud
+                    // Aquí puedes manejar errores de conexión, tiempo de espera, etc.
                 }
-            },
-            { error ->
-                // Manejar el error de la solicitud
-                // Aquí puedes manejar errores de conexión, tiempo de espera, etc.
-            }
-        )
+            )
 
 
-        // Añade la solicitud a la cola
-        queue.add(request)
-    }*/
+            // Añade la solicitud a la cola
+            queue.add(request)
+        }
+    }
+
+    private fun createOwnArticleObject(wikiArticle: MutableList<WikiArticle>, wikiArticleWithImage: MutableList<WikiArticleWithImage>): MutableList<WikiArticleOwn> {
+
+        var articlesOwnList: MutableList<WikiArticleOwn> = ArrayList()
+
+        for ((index,articleWithImage) in wikiArticleWithImage.withIndex() ){
+
+            var articleown = WikiArticleOwn(articleWithImage.pageid,articleWithImage.title,articleWithImage.imagenUrl,articleWithImage.articleUrl,"")
+            articlesOwnList.add(articleown )
+
+        }
+
+        for ((index,articleWithImage) in wikiArticle.withIndex() ){
+
+            articlesOwnList[index].distance = articleWithImage.distance.toString()
+
+        }
+
+
+
+        return articlesOwnList
+    }
 
 
 
 
-    override fun getWikiArticlesFromApi(
+    override suspend fun getWikiArticlesFromApi(
         successListener: (MutableList<WikiArticleOwn>) -> Unit,
         errorListener:(String) -> Unit){
 
@@ -204,14 +221,43 @@ class MainApi(var context: Context): MainContract.ModelApi{
 
         LogHandler.w("position: $position")
         if(position != null){
+
             var (latitude, longitude) = position
             LogHandler.w("position: $latitude")
 
-            searchNearsArticles(latitude,longitude, successListener, errorListener)
 
+            try {
+                // Realiza la primera llamada a la API
+                val articlesWiki = withContext(Dispatchers.IO) {
 
-        }else{
+                    searchNearsArticlesAsync(latitude, longitude)
+                }
 
+                var wikiIds: List<Int> = articlesWiki.map {
+                    it.pageId
+                }
+                LogHandler.w("pagesIDS: $wikiIds")
+
+                // Realiza la segunda llamada a la API con datos de la primera respuesta
+                val articlesWithImages = withContext(Dispatchers.IO) {
+                    searchArticlesInfo(wikiIds)
+                }
+
+                LogHandler.w("pre articlesOwnList: ")
+
+                var articlesOwnList: MutableList<WikiArticleOwn> = createOwnArticleObject(articlesWiki,articlesWithImages)
+
+                LogHandler.w("articlesOwnList: $articlesOwnList")
+                // Llama al successListener con los resultados finales
+                successListener(articlesOwnList)
+
+                LogHandler.w("fin corrutina")
+            } catch (e: Exception) {
+                // Manejar errores
+                errorListener(e.message ?: "Error desconocido")
+            }
+        } else {
+            // Manejar el caso en que la posición sea nula
         }
 
 

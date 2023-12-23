@@ -1,5 +1,7 @@
 package com.happydonia.pruebaTecnica.domain.adapters
 import android.content.Context  // Asegúrate de importar la clase Context de Android
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,8 +12,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.happydonia.pruebaTecnica.R
+import com.happydonia.pruebaTecnica.domain.WikiArticle
 import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
+import com.happydonia.pruebaTecnica.utils.CircleTransform
 import com.happydonia.pruebaTecnica.utils.LocationHandler
+import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 
 class WikiArticlesAdapter : ListAdapter<WikiArticleOwn, RecyclerView.ViewHolder>(WikiArticleDiffCallback()) {
@@ -77,26 +82,50 @@ class WikiArticlesAdapter : ListAdapter<WikiArticleOwn, RecyclerView.ViewHolder>
         val tvActualPosition: TextView = view.findViewById(R.id.tvActualPosition)
     }
 
+    private lateinit var onItemClickListener: ((wikiArticle: WikiArticleOwn) -> Unit)
+    fun setOnItemClickListener(onItemClickListener: (wikiArticle: WikiArticleOwn) -> Unit) {
+        this.onItemClickListener = onItemClickListener
+    }
+
     // ViewHolder para los elementos de la lista
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val wikiArticleTitle = view.findViewById(R.id.tv_wikiTitle) as TextView
         val wikiArticleImage = view.findViewById(R.id.iv_wikiImage) as ImageView
         val wikiArticleDistance = view.findViewById(R.id.tv_wikiDistance) as TextView
 
+
+
         fun bind(wikiArticle: WikiArticleOwn, context: Context) {
             wikiArticleTitle.text = wikiArticle.title
-            wikiArticleDistance.text = wikiArticle.distance.toString()
-            itemView.setOnClickListener(View.OnClickListener {
-                Toast.makeText(context, wikiArticle.title, Toast.LENGTH_SHORT).show()
-            })
+            wikiArticleDistance.text = "${wikiArticle.distance.toString()} miles"
+            itemView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(wikiArticle.fullUrl))
+                context.startActivity(intent)
+            }
             wikiArticleImage.loadUrl(wikiArticle.imageUrl)
         }
 
         fun ImageView.loadUrl(url: String) {
-            Picasso.with(context).load(url).into(this)
+            Picasso.with(context)
+                .load(url)
+                .fit()
+                .centerCrop()
+                .transform(CircleTransform())
+                .into(this)
         }
+
+
+
     }
+
+
+
+
+
 }
+
+
+
 
 class WikiArticleDiffCallback : DiffUtil.ItemCallback<WikiArticleOwn>() {
     override fun areItemsTheSame(oldItem: WikiArticleOwn, newItem: WikiArticleOwn): Boolean {

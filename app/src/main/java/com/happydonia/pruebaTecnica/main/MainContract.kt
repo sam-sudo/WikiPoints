@@ -12,12 +12,12 @@ interface MainContract {
     }
 
     interface Presenter{
-        fun getWikiArticles()
+        suspend fun getWikiArticles()
     }
 
     interface ModelApi{
-        fun getWikiArticlesFromApi( successListener: (MutableList<WikiArticleOwn>) -> Unit,
-                                   errorListener: (String) -> Unit )
+        suspend fun getWikiArticlesFromApi(successListener: (MutableList<WikiArticleOwn>) -> Unit,
+                                           errorListener: (String) -> Unit )
     }
 
 }

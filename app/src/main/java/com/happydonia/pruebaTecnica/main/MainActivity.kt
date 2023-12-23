@@ -1,11 +1,11 @@
 package com.happydonia.pruebaTecnica.main
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -13,11 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.happydonia.pruebaTecnica.R
-import com.happydonia.pruebaTecnica.domain.WikiArticle
 import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
 import com.happydonia.pruebaTecnica.domain.adapters.WikiArticlesAdapter
 import com.happydonia.pruebaTecnica.utils.LogHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity  : AppCompatActivity(), MainContract.View{
 
@@ -27,7 +29,8 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     lateinit var mRecyclerView : RecyclerView
     val mAdapter : WikiArticlesAdapter = WikiArticlesAdapter()
     lateinit var mainPresenter: MainPresenter
-
+    private lateinit var progressBar: ProgressBar
+    private lateinit var tvNoPermission: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,12 +38,15 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
         mRecyclerView = findViewById<RecyclerView>(R.id.rvWikiArticles)
         mRecyclerView.layoutManager = LinearLayoutManager(this)
+
         mAdapter.WikiArticlesAdapter(this)
         mRecyclerView.adapter = mAdapter
 
         mainPresenter = MainPresenter(this,MainApi(this))
 
 
+        progressBar = findViewById(R.id.progressBar)
+        tvNoPermission = findViewById(R.id.tv_no_permissions)
 
 
         if (checkSelfPermission(
@@ -70,6 +76,8 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     override fun showWikiArticles(wikiList: MutableList<WikiArticleOwn>) {
         LogHandler.w("showWiki")
 
+        hideProgressBar()
+        showRecyclerList()
         mAdapter.submitList(wikiList)
 
         /*mAdapter.wikiArticles = wikiList*/
@@ -88,8 +96,18 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     private fun permissionsAccepted(){
         LogHandler.w("permission accepted", "Permissions")
         //showWikiArticles(getWikiArticles())
-        mainPresenter.getWikiArticles()
 
+        hideRecyclerList()
+        showProgressBar()
+        GlobalScope.launch {
+            try {
+
+                mainPresenter.getWikiArticles()
+            }catch (e: Exception){
+                LogHandler.w("Error en el primer try catch")
+            }
+        }
+        LogHandler.w("permission accepted done", "Permissions")
 
     }
 
@@ -125,7 +143,9 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         }
         builder.setNegativeButton("Denegar") { dialog, which ->
             // Puedes mostrar un mensaje o realizar acciones si el usuario niega los permisos
+            showError("No se han concedido los permisos de ubicación.")
             dialog.dismiss()
+            showNoPermissionsText()
         }
         builder.setCancelable(false)
         builder.show()
@@ -141,6 +161,31 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         }
     }
 
+    // Función para mostrar el Snackbar
+    private fun showProgressBar() {
+        progressBar.visibility = View.VISIBLE
+    }
 
+    private fun hideProgressBar() {
+        progressBar.visibility = View.GONE
+    }
+
+    private fun showNoPermissionsText() {
+        tvNoPermission.visibility = View.VISIBLE
+    }
+
+    private fun hideNoPermissionsText() {
+        tvNoPermission.visibility = View.GONE
+    }
+
+
+
+    private fun hideRecyclerList() {
+        mRecyclerView.visibility = View.GONE
+    }
+    private fun showRecyclerList() {
+        hideNoPermissionsText()
+        mRecyclerView.visibility = View.VISIBLE
+    }
 
 }

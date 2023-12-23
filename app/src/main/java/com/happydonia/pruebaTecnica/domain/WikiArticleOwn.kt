@@ -4,8 +4,9 @@ import kotlinx.serialization.SerialName
 
 
 data class WikiArticleOwn(
-     val pageId: String,
-     val title: String,
-     val distance: String,
-     val imageUrl: String
+     var pageId: String,
+     var title: String,
+     var imageUrl: String,
+     var fullUrl: String,
+     var distance: String?
 )

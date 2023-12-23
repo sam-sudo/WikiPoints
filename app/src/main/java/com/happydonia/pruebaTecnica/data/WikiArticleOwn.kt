@@ -1,6 +1,4 @@
-package com.happydonia.pruebaTecnica.domain
-
-import kotlinx.serialization.SerialName
+package com.happydonia.pruebaTecnica.data
 
 
 data class WikiArticleOwn(

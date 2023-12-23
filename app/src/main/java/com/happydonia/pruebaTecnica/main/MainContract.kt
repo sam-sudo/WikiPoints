@@ -1,8 +1,6 @@
 package com.happydonia.pruebaTecnica.main
 
-import android.content.Context
-import com.happydonia.pruebaTecnica.domain.WikiArticle
-import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
+import com.happydonia.pruebaTecnica.data.WikiArticleOwn
 
 interface MainContract {
 

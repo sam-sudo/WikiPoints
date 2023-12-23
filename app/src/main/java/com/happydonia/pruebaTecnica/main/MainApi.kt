@@ -5,11 +5,11 @@ import android.util.Log
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.happydonia.pruebaTecnica.domain.WikiArticle
+import com.happydonia.pruebaTecnica.data.WikiArticle
 import org.json.JSONException
 import com.android.volley.Request;
-import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
-import com.happydonia.pruebaTecnica.domain.WikiArticleWithImage
+import com.happydonia.pruebaTecnica.data.WikiArticleOwn
+import com.happydonia.pruebaTecnica.data.WikiArticleWithImage
 import com.happydonia.pruebaTecnica.utils.LocationHandler
 import com.happydonia.pruebaTecnica.utils.LogHandler
 import kotlinx.coroutines.Dispatchers

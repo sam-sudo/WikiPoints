@@ -1,4 +1,4 @@
-package com.happydonia.pruebaTecnica.domain.adapters
+package com.happydonia.pruebaTecnica.adapters
 import android.content.Context  // Asegúrate de importar la clase Context de Android
 import android.content.Intent
 import android.net.Uri
@@ -7,19 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.happydonia.pruebaTecnica.R
-import com.happydonia.pruebaTecnica.domain.WikiArticle
-import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
+import com.happydonia.pruebaTecnica.data.WikiArticleOwn
 import com.happydonia.pruebaTecnica.utils.CircleTransform
 import com.happydonia.pruebaTecnica.utils.LocationHandler
-import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 
-class WikiArticlesAdapter : ListAdapter<WikiArticleOwn, RecyclerView.ViewHolder>(WikiArticleDiffCallback()) {
+class WikiArticlesAdapter : ListAdapter<WikiArticleOwn, RecyclerView.ViewHolder>(
+    WikiArticleDiffCallback()
+) {
 
     private val HEADER_TYPE = 1
     private val ITEM_TYPE = 2

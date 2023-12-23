@@ -14,10 +14,9 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.snackbar.Snackbar
 import com.happydonia.pruebaTecnica.R
-import com.happydonia.pruebaTecnica.domain.WikiArticleOwn
-import com.happydonia.pruebaTecnica.domain.adapters.WikiArticlesAdapter
+import com.happydonia.pruebaTecnica.data.WikiArticleOwn
+import com.happydonia.pruebaTecnica.adapters.WikiArticlesAdapter
 import com.happydonia.pruebaTecnica.utils.LogHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -32,6 +31,8 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     lateinit var mainPresenter: MainPresenter
     private lateinit var progressBar: ProgressBar
     private lateinit var tvNoPermission: TextView
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -82,9 +83,6 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         LogHandler.w("END onCreate mainActivity")
 
     }
-
-
-
 
     override fun showWikiArticles(wikiList: MutableList<WikiArticleOwn>) {
         LogHandler.w("showWiki")
@@ -147,6 +145,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         }
     }
 
+    // Functions
     private fun showLocationPermissionDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Permisos de Ubicación")
@@ -175,11 +174,10 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         }
     }
 
-    // Función para mostrar el Snackbar
+
     private fun showProgressBar() {
         progressBar.visibility = View.VISIBLE
     }
-
     private fun hideProgressBar() {
         progressBar.visibility = View.GONE
     }
@@ -187,12 +185,9 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     private fun showNoPermissionsText() {
         tvNoPermission.visibility = View.VISIBLE
     }
-
     private fun hideNoPermissionsText() {
         tvNoPermission.visibility = View.GONE
     }
-
-
 
     private fun hideRecyclerList() {
         swipeRefreshLayout.visibility = View.GONE

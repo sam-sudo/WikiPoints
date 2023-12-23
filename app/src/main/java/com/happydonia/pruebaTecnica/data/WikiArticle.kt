@@ -1,4 +1,4 @@
-package com.happydonia.pruebaTecnica.domain
+package com.happydonia.pruebaTecnica.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

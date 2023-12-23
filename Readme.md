@@ -8,14 +8,21 @@ This Kotlin application leverages Wikipedia's geosearch API to display points of
 
 ## Usage
 
-> [!CAUTION]
+> [!WARNING]
 > If put `android:exported="false"` in manifest, can generate a "open close" the first time you open the app.
 
 
 
 ### JSON Structure 1:
 
+`https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=37.7749|-122.4194&gsradius=10000&format=json`
 
+- **Parámetros:**
+  - `action=query`: Indica que se realizará una consulta.
+  - `list=geosearch`: Especifica que se desea obtener una lista de resultados de búsqueda geográfica.
+  - `gscoord=37.7749|-122.4194`: Coordenadas geográficas de referencia para la búsqueda.
+  - `gsradius=10000`: Radio en metros alrededor de las coordenadas de referencia en el que se buscarán páginas.
+  - `format=json`: Indica que se desea la respuesta en formato JSON.
 
 ```json
 {
@@ -39,6 +46,15 @@ This Kotlin application leverages Wikipedia's geosearch API to display points of
 This JSON structure contains information about a list of nearest point around you.
 
 ### JSON Structure 2:
+
+`https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|info&pageids=2239406|1511602&inprop=url&format=json`
+
+- **Parámetros:**
+  - `action=query`: Indica que se realizará una consulta.
+  - `prop=coordinates|pageimages|info`: Especifica los elementos que se desean obtener (coordenadas, imágenes, información general).
+  - `pageids=2239406|1511602`: IDs de las páginas para las cuales se busca información.
+  - `inprop=url`: Incluye la URL de las páginas en la respuesta.
+  - `format=json`: Indica que se desea la respuesta en formato JSON.
 
 ```json
 {

@@ -16,5 +16,13 @@ object LogHandler {
 
     }
 
+    fun e(message: String, tag: String = TAG){
+        if (BuildConfig.BUILD_TYPE == "debug") {
+            Log.e(tag, message)
+        }
+
+
+    }
+
 
 }

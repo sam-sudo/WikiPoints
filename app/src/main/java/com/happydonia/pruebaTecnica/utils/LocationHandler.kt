@@ -5,15 +5,13 @@ import android.location.LocationManager
 
 object LocationHandler {
 
-    private lateinit var locationManager: LocationManager
-
 
 
      fun getPosition(context: Context): Pair<Double, Double>? {
-
+            LogHandler.w("position","get position")
         return try {
 
-            locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            var locationManager: LocationManager  = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
 
             val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)

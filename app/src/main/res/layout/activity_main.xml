@@ -41,4 +41,15 @@
         android:visibility="gone"
         android:textColor="@color/colorTextPrimary" />
 
+    <TextView
+        android:id="@+id/tv_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/error"
+        android:textSize="30dp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:textColor="@color/colorTextPrimary" />
+
 </androidx.appcompat.widget.LinearLayoutCompat>

@@ -2,4 +2,5 @@
     <string name="app_name">wikiPoints</string>
     <string name="location_now">Actual position:</string>
     <string name="no_permission">Necestas permisos de ubicación para poder usar la APP.</string>
+    <string name="error">Algo fue mal obteniendo la ubicación, reinicia la app.</string>
 </resources>

@@ -101,7 +101,12 @@ class WikiArticlesAdapter : ListAdapter<WikiArticleOwn, RecyclerView.ViewHolder>
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(wikiArticle.fullUrl))
                 context.startActivity(intent)
             }
-            wikiArticleImage.loadUrl(wikiArticle.imageUrl)
+            if(wikiArticle.imageUrl.isNotEmpty()){
+                wikiArticleImage.loadUrl(wikiArticle.imageUrl)
+            }else{
+                //default img
+                //wikiArticleImage.loadUrl(wikiArticle.imageUrl)
+            }
         }
 
         fun ImageView.loadUrl(url: String) {

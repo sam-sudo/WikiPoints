@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isEmpty
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -31,6 +32,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     lateinit var mainPresenter: MainPresenter
     private lateinit var progressBar: ProgressBar
     private lateinit var tvNoPermission: TextView
+    private lateinit var tvError: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +51,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
 
         progressBar = findViewById(R.id.progressBar)
         tvNoPermission = findViewById(R.id.tv_no_permissions)
+        tvError = findViewById(R.id.tv_error)
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
@@ -89,6 +92,7 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         swipeRefreshLayout.isRefreshing = false
         hideProgressBar()
         showRecyclerList()
+        hideNoErrorText()
         mAdapter.submitList(wikiList)
 
         /*mAdapter.wikiArticles = wikiList*/
@@ -97,6 +101,11 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
     }
 
     override fun showError(message: String) {
+        hideProgressBar()
+        if(mRecyclerView.isEmpty()){
+            //show error view
+            showErrorText()
+        }
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
     }
 
@@ -112,7 +121,6 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         showProgressBar()
         GlobalScope.launch {
             try {
-
                 mainPresenter.getWikiArticles()
             }catch (e: Exception){
                 LogHandler.w("Error en el primer try catch")
@@ -186,6 +194,13 @@ class MainActivity  : AppCompatActivity(), MainContract.View{
         tvNoPermission.visibility = View.VISIBLE
     }
     private fun hideNoPermissionsText() {
+        tvNoPermission.visibility = View.GONE
+    }
+
+    private fun showErrorText() {
+        tvNoPermission.visibility = View.VISIBLE
+    }
+    private fun hideNoErrorText() {
         tvNoPermission.visibility = View.GONE
     }
 

@@ -31,7 +31,7 @@ class MainPresenter(private val mainView: MainContract.View, private val mainApi
 
 
         },{errorMessage ->
-            mainView.showError("Error trying download Articles")
+            mainView.showError(errorMessage)
         })
 
 

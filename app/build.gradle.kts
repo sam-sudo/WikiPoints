@@ -50,6 +50,9 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("androidx.recyclerview:recyclerview:1.2.0")
 
+    //Mockito
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+
     //Picasso
     implementation ("com.squareup.picasso:picasso:2.5.2")
 

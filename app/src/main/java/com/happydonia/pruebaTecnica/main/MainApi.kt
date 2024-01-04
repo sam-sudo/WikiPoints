@@ -24,7 +24,7 @@ class MainApi(var context: Context): MainContract.ModelApi{
     private val FORMAT_JSON = "json"
 
     // Método para hacer la solicitud a la API de MediaWiki
-    private suspend fun  searchNearsArticlesAsync(latitud: Double, longitud: Double): MutableList<WikiArticle> {
+    suspend fun  searchNearsArticlesAsync(latitud: Double, longitud: Double): MutableList<WikiArticle> {
         return suspendCancellableCoroutine { continuation ->
 
             // Obtén la instancia de RequestQueue
@@ -158,15 +158,23 @@ class MainApi(var context: Context): MainContract.ModelApi{
                         for (pageId in pageIds) {
                             val pageObject = pagesObject.getJSONObject(pageId)
 
-                            val title = pageObject.getString("title")
-                            val fullUrl = pageObject.getString("fullurl")
-                            val thumbnailObject = pageObject.getJSONObject("thumbnail")
-                            val thumbnailSource = thumbnailObject.getString("source")
-                            val pageImage = pageObject.getString("pageimage")
+                            try {
+                                var thumbnailSource= ""
+                                var pageImage = ""
+                                val title =  pageObject.getString("title") ?: ""
+                                val fullUrl = pageObject.getString("fullurl") ?: ""
+                                if(pageObject.has("thumbnail")){
+                                    val thumbnailObject = pageObject.getJSONObject("thumbnail")
+                                    thumbnailSource = thumbnailObject.getString("source") ?: ""
+                                    pageImage = pageObject.getString("pageimage") ?: ""
+                                }
 
-                            val wikiPage = WikiArticleWithImage(title,pageId,pageImage,thumbnailSource,fullUrl)
+                                val wikiPage = WikiArticleWithImage(title,pageId,pageImage,thumbnailSource,fullUrl)
 
-                            pagesList.add(wikiPage)
+                                pagesList.add(wikiPage)
+                            }catch (e: Exception){
+                                LogHandler.e("Can't create object","creation_Object")
+                            }
                         }
 
                         continuation.resume(pagesList)
@@ -187,7 +195,7 @@ class MainApi(var context: Context): MainContract.ModelApi{
         }
     }
 
-    private fun createOwnArticleObject(wikiArticle: MutableList<WikiArticle>, wikiArticleWithImage: MutableList<WikiArticleWithImage>): MutableList<WikiArticleOwn> {
+     fun createOwnArticleObject(wikiArticle: MutableList<WikiArticle>, wikiArticleWithImage: MutableList<WikiArticleWithImage>): MutableList<WikiArticleOwn> {
 
         var articlesOwnList: MutableList<WikiArticleOwn> = ArrayList()
 
@@ -258,6 +266,7 @@ class MainApi(var context: Context): MainContract.ModelApi{
             }
         } else {
             // Manejar el caso en que la posición sea nula
+            errorListener("No se pudo obtener la localizacion")
         }
 
 
